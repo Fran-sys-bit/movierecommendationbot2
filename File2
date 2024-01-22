@@ -1,0 +1,77 @@
+!pip install langchain transformers streamlit
+import streamlit as st
+from transformers import pipeline
+
+# Initialize RAG pipeline for question-answering
+rag_pipeline = pipeline("text2text-generation", model="facebook/rag-token-nq")
+
+# Streamlit UI
+st.title("AI Chatbot")
+
+# Input text box
+user_input = st.text_area("Ask me anything:")
+
+if st.button("Get Answer"):
+    # Use RAG pipeline for question-answering
+    answer = rag_pipeline(user_input)["generated_text"]
+
+    st.write("Answer:", answer)
+!pip install PyMuPDF
+import streamlit as st
+from transformers import pipeline
+import fitz  # PyMuPDF for handling PDFs
+from bs4 import BeautifulSoup  # BeautifulSoup for web scraping
+import requests
+
+# Initialize RAG pipeline for question-answering
+rag_pipeline = pipeline("text2text-generation", model="facebook/rag-token-nq")
+
+# Streamlit UI
+st.title("AI Chatbot")
+
+# Input text box
+user_input = st.text_area("Ask me anything:")
+
+if st.button("Get Answer"):
+    # Use RAG pipeline for question-answering
+    answer = rag_pipeline(user_input)["generated_text"]
+
+    # Display the answer
+    st.write("Answer:", answer)
+
+    # Handle PDFs
+    pdf_file = st.file_uploader("Upload a PDF file", type=["pdf"])
+    if pdf_file:
+        pdf_text = ""
+        with fitz.open(pdf_file) as pdf_document:
+            for page_num in range(pdf_document.page_count):
+                page = pdf_document[page_num]
+                pdf_text += page.get_text()
+
+        # Process PDF text with LangChain or other pre-processing steps
+        # ...
+
+        # Use RAG pipeline for question-answering on PDF text
+        pdf_answer = rag_pipeline(pdf_text)["generated_text"]
+        st.write("Answer from PDF:", pdf_answer)
+
+    # Handle websites
+    website_url = st.text_input("Enter a website URL:")
+    if st.button("Get Answer from Website") and website_url:
+        # Fetch HTML content from the website
+        response = requests.get(website_url)
+        if response.status_code == 200:
+            html_content = response.text
+
+            # Extract text content from HTML using BeautifulSoup
+            soup = BeautifulSoup(html_content, "html.parser")
+            website_text = soup.get_text()
+
+            # Process website text with LangChain or other pre-processing steps
+            # ...
+
+            # Use RAG pipeline for question-answering on website text
+            website_answer = rag_pipeline(website_text)["generated_text"]
+            st.write("Answer from Website:", website_answer)
+        else:
+            st.write(f"Failed to fetch content from {website_url}. Please check the URL.")
